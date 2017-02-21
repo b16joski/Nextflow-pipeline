@@ -1,0 +1,41 @@
+#!/usr/bin/env nextflow
+
+//Lets define pipeline parameters in order to specify the refence genome
+//and read pairs by using the command line options
+
+ params.reads = "./*_{R1,R2}.fastq"
+ params.genome = "/proj/b2016371/src/bbmap/resources/adapters.fa"
+
+//Create a channel for the reference genome file
+ genome_file = file(params.genome)
+
+
+//Creates the `read_pairs` channel that emits for each read-pair a tuple containing
+//three elements: the pair ID, the first read-pair file and the second read-pair file
+
+ Channel
+    .fromFilePairs( params.reads )
+    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+    .set { read_pairs }
+
+//process 1: Adapter and quality trimming
+
+ process bbduk {
+
+        publishDir './genomes_bbduk1'
+
+        input:
+        set pair_id, file(reads) from read_pairs
+        file genome_file
+
+        output:
+        set file('clean1.fastq'), file('clean2.fastq'), file('stats.txt') 
+        script:
+
+        """
+        bbduk.sh -Xmx1g in1=${reads[0]} in2=${reads[1]} out1=clean1.fastq out2=clean2.fastq \
+        minlen=30 qtrim=rl trimq=10 ktrim=r k=30 mink=11 ref=${genome_file} hdist=1 stats=stats.txt tbo tpe
+
+        """
+
+ }
