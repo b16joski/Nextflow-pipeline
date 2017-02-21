@@ -1,6 +1,6 @@
 # Nextflow-pipeline
-Helicobacter pylori pipeline implemented in nextflow
-This is where we are going to be implementing the hpylori nextflow pipeline
+Helicobacter pylori pipeline analysis implemented in Nextflow.
+
 
 1.bbduk tool has been implimented so far in nextflow for adapter trimming and quality-trimming
 
