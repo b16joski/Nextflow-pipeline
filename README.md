@@ -1,5 +1,5 @@
 # Nextflow-pipeline
-Helicobacter pylori pipeline analysis implemented in Nextflow.
+Helicobacter pylori Whole Genome pipeline analysis implemented in Nextflow.
 
 
 1.bbduk tool has been implimented so far in nextflow for adapter trimming and quality-trimming
