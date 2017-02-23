@@ -29,7 +29,7 @@
         file genome_file
 
         output:
-        set file('clean1.fastq'), file('clean2.fastq'), file('stats.txt') 
+        set file('clean1.fastq'), file('clean2.fastq'), file('stats.txt') into fastqc-input
         script:
 
         """
