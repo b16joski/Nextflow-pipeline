@@ -21,21 +21,58 @@
 //process 1: Adapter and quality trimming
 
  process bbduk {
-
-        publishDir './genomes_bbduk1'
+        tag {pair_id}
+        publishDir './genomes_bbduktestfinal'
 
         input:
         set pair_id, file(reads) from read_pairs
         file genome_file
 
         output:
-        set file('clean1.fastq'), file('clean2.fastq'), file('stats.txt') into fastqc-input
+        set pair_id, file("*.bbduk.fastq") into fastqc_input, spades_input
+        file "${pair_id}.stats.txt"
         script:
-
         """
-        bbduk.sh -Xmx1g in1=${reads[0]} in2=${reads[1]} out1=clean1.fastq out2=clean2.fastq \
-        minlen=30 qtrim=rl trimq=10 ktrim=r k=30 mink=11 ref=${genome_file} hdist=1 stats=stats.txt tbo tpe
-
+        bbduk.sh -Xmx1g \
+             in1=${reads[0]} \
+             in2=${reads[1]} \
+             ref=${genome_file} \
+             out1=${reads[0].baseName}.bbduk.fastq \
+             out2=${reads[1].baseName}.bbduk.fastq \
+             stats=${pair_id}.stats.txt \
+             minlen=30 \
+             qtrim=rl \
+             trimq=10 \
+             ktrim=r \
+             k=30 \
+             mink=11 \
+             hdist=1 \
+             trimbyoverlap \
+             trimpairsevenly \
         """
 
  }
+ // STEP 2 - FastQC
+
+process fastqc {
+
+                tag "$name"
+                publishDir './fastqc_results'
+                module 'bioinfo-tools:FastQC'
+
+                input:
+                set val(name), file(clean_reads) from fastqc_input
+
+                output:
+
+                file "*_fastqc.{zip,html}" into fastqc_output
+
+
+                """
+
+                fastqc --quiet ${clean_reads}
+
+                """
+
+}
+
